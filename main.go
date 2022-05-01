@@ -21,7 +21,7 @@ func main() {
 	defer manager.Close()
 
 	// Create an application UI.
-	ui, err := screen.NewHandle(manager)
+	ui, err := screen.NewWindow(manager)
 	if err != nil {
 		log.Fatal(err)
 	}
