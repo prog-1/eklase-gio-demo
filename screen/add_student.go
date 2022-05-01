@@ -10,8 +10,8 @@ import (
 	"gioui.org/widget/material"
 )
 
-// addStudent defines a screen layout for adding a new student.
-func addStudent(th *material.Theme, state *state.State) Screen {
+// AddStudent defines a screen layout for adding a new student.
+func AddStudent(th *material.Theme, state *state.State) Screen {
 	var (
 		name    widget.Editor
 		surname widget.Editor
@@ -47,7 +47,7 @@ func addStudent(th *material.Theme, state *state.State) Screen {
 			layout.Rigid(rowInset(buttonsRowLayout)),
 		)
 		if close.Clicked() {
-			return mainMenu(th, state), d
+			return MainMenu(th, state), d
 		}
 		if save.Clicked() {
 			err := state.AddStudent(
@@ -58,7 +58,7 @@ func addStudent(th *material.Theme, state *state.State) Screen {
 				// TODO: Show an error toast.
 				log.Printf("unable to add student: %v", err)
 			}
-			return mainMenu(th, state), d
+			return MainMenu(th, state), d
 		}
 		return nil, d
 	}

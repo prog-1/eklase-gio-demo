@@ -13,8 +13,8 @@ import (
 	"gioui.org/widget/material"
 )
 
-// listStudents defines a screen layout for listing existing students.
-func listStudents(th *material.Theme, state *state.State) Screen {
+// ListStudent defines a screen layout for listing existing students.
+func ListStudent(th *material.Theme, state *state.State) Screen {
 	var close widget.Clickable
 	list := widget.List{List: layout.List{Axis: layout.Vertical}}
 
@@ -54,7 +54,7 @@ func listStudents(th *material.Theme, state *state.State) Screen {
 			layout.Rigid(rowInset(material.Button(th, &close, "Close").Layout)),
 		)
 		if close.Clicked() {
-			return mainMenu(th, state), d
+			return MainMenu(th, state), d
 		}
 		return nil, d
 	}

@@ -8,8 +8,8 @@ import (
 	"gioui.org/widget/material"
 )
 
-// mainMenu defines a main menu screen layout.
-func mainMenu(th *material.Theme, state *state.State) Screen {
+// MainMenu defines a main menu screen layout.
+func MainMenu(th *material.Theme, state *state.State) Screen {
 	var (
 		add  widget.Clickable
 		list widget.Clickable
@@ -22,10 +22,10 @@ func mainMenu(th *material.Theme, state *state.State) Screen {
 			layout.Rigid(rowInset(material.Button(th, &quit, "Quit").Layout)),
 		)
 		if add.Clicked() {
-			return addStudent(th, state), d
+			return AddStudent(th, state), d
 		}
 		if list.Clicked() {
-			return listStudents(th, state), d
+			return ListStudent(th, state), d
 		}
 		if quit.Clicked() {
 			state.Quit()
