@@ -57,26 +57,26 @@ func New(path string) (*Storage, error) {
 }
 
 // Close closes the database after it is no longer required.
-func (h *Storage) Close() error {
-	return h.db.Close()
+func (s *Storage) Close() error {
+	return s.db.Close()
 }
 
 // Students returns a slice of existing students.
-func (h Storage) Students() ([]StudentEntry, error) {
+func (s Storage) Students() ([]StudentEntry, error) {
 	var entries []StudentEntry
 	// Read rows from the `students` table and populate students field in the
 	// handler.
-	if err := h.db.Select(&entries, selectStudentsStmt); err != nil {
+	if err := s.db.Select(&entries, selectStudentsStmt); err != nil {
 		return nil, fmt.Errorf("querying 'students' table failed. Query: %v\nError: %v", selectStudentsStmt, err)
 	}
 	return entries, nil
 }
 
 // AddStudent appends a new student entry to the database.
-func (h *Storage) AddStudent(name, surname string) error {
+func (s *Storage) AddStudent(name, surname string) error {
 	// Attempt to add an entry to the database first.
 	// If it fails, the student field will not be modified.
-	res, err := h.db.Exec(insertStudentsStmt, name, surname)
+	res, err := s.db.Exec(insertStudentsStmt, name, surname)
 	if err != nil {
 		return fmt.Errorf("table creation failed. Query: %v\nError: %v", createTableStmt, err)
 	}
