@@ -2,6 +2,8 @@ package screen
 
 import (
 	"eklase/state"
+	"log"
+	"strings"
 
 	"gioui.org/layout"
 	"gioui.org/widget"
@@ -17,6 +19,16 @@ func addStudent(th *material.Theme, state *state.State) Screen {
 		close widget.Clickable
 		save  widget.Clickable
 	)
+	enabledIfNameOK := func(w layout.Widget) layout.Widget {
+		return func(gtx layout.Context) layout.Dimensions {
+			name := strings.TrimSpace(name.Text())
+			surname := strings.TrimSpace(surname.Text())
+			if name == "" && surname == "" { // Either name or surname is OK.
+				gtx = gtx.Disabled()
+			}
+			return w(gtx)
+		}
+	}
 	editsRowLayout := func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 			layout.Flexed(1, colInset(material.Editor(th, &name, "First name").Layout)),
@@ -26,7 +38,7 @@ func addStudent(th *material.Theme, state *state.State) Screen {
 	buttonsRowLayout := func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 			layout.Flexed(1, colInset(material.Button(th, &close, "Close").Layout)),
-			layout.Flexed(1, colInset(material.Button(th, &save, "Save").Layout)),
+			layout.Flexed(1, enabledIfNameOK(colInset(material.Button(th, &save, "Save").Layout))),
 		)
 	}
 	return func(gtx layout.Context) (Screen, layout.Dimensions) {
@@ -38,7 +50,14 @@ func addStudent(th *material.Theme, state *state.State) Screen {
 			return mainMenu(th, state), d
 		}
 		if save.Clicked() {
-			state.AddStudent(name.Text(), surname.Text())
+			err := state.AddStudent(
+				strings.TrimSpace(name.Text()),
+				strings.TrimSpace(surname.Text()),
+			)
+			if err != nil {
+				// TODO: Show an error toast.
+				log.Printf("unable to add student: %v", err)
+			}
 			return mainMenu(th, state), d
 		}
 		return nil, d
