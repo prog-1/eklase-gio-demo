@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
+	"eklase/screen"
 	"eklase/state"
-	"eklase/ui"
 
 	"gioui.org/app"
 
@@ -21,7 +21,7 @@ func main() {
 	defer state.Close()
 
 	// Create an application UI.
-	ui, err := ui.New(state)
+	ui, err := screen.NewHandle(state)
 	if err != nil {
 		log.Fatal(err)
 	}
