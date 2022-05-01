@@ -56,6 +56,13 @@ func New(path string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
+func Must(s *Storage, err error) *Storage {
+	if err != nil {
+		log.Fatalf("unable to create storage: %v", err)
+	}
+	return s
+}
+
 // Close closes the database after it is no longer required.
 func (s *Storage) Close() error {
 	return s.db.Close()

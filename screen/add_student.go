@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"eklase/manager"
+	"eklase/state"
 
 	"gioui.org/layout"
 	"gioui.org/widget"
@@ -9,7 +9,7 @@ import (
 )
 
 // addStudent defines a screen layout for adding a new student.
-func addStudent(th *material.Theme, state *manager.AppManager) Screen {
+func addStudent(th *material.Theme, state *state.State) Screen {
 	var (
 		name    widget.Editor
 		surname widget.Editor

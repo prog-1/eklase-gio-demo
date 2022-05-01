@@ -4,8 +4,9 @@ import (
 	"log"
 	"os"
 
-	"eklase/manager"
 	"eklase/screen"
+	"eklase/state"
+	"eklase/storage"
 
 	"gioui.org/app"
 
@@ -13,23 +14,22 @@ import (
 )
 
 func main() {
-	// Initialize the manager.
-	manager, err := manager.New("school.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer manager.Close()
-
-	// Create an application UI.
-	ui, err := screen.NewWindow(manager)
-	if err != nil {
-		log.Fatal(err)
-	}
+	storage := storage.Must(storage.New("school.db")) // We'll defer Close later.
+	state := state.New(storage)
 
 	// Run the main event loop.
 	go func() {
-		if err := ui.HandleEvents(manager); err != nil {
+		ui, err := screen.NewWindow(state)
+		if err != nil {
 			log.Fatal(err)
+		}
+
+		func() { // For deferred calls.
+			defer storage.Close()
+			err = ui.HandleEvents(state)
+		}()
+		if err != nil {
+			log.Fatalf("failed to handle events: %v", err)
 		}
 		// Gracefully exit the application at the end.
 		os.Exit(0)

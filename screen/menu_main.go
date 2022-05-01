@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"eklase/manager"
+	"eklase/state"
 
 	"gioui.org/layout"
 	"gioui.org/widget"
@@ -9,7 +9,7 @@ import (
 )
 
 // mainMenu defines a main menu screen layout.
-func mainMenu(th *material.Theme, manager *manager.AppManager) Screen {
+func mainMenu(th *material.Theme, state *state.State) Screen {
 	var (
 		add  widget.Clickable
 		list widget.Clickable
@@ -22,13 +22,13 @@ func mainMenu(th *material.Theme, manager *manager.AppManager) Screen {
 			layout.Rigid(rowInset(material.Button(th, &quit, "Quit").Layout)),
 		)
 		if add.Clicked() {
-			return addStudent(th, manager), d
+			return addStudent(th, state), d
 		}
 		if list.Clicked() {
-			return listStudents(th, manager), d
+			return listStudents(th, state), d
 		}
 		if quit.Clicked() {
-			manager.Quit()
+			state.Quit()
 		}
 		return nil, d
 	}
