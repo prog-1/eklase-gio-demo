@@ -17,8 +17,8 @@ func addStudent(th *material.Theme, state *state.Handle) Screen {
 		close widget.Clickable
 		save  widget.Clickable
 	)
-	return func(gtx layout.Context) Screen {
-		layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+	return func(gtx layout.Context) (Screen, layout.Dimensions) {
+		d := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
 					layout.Flexed(1, material.Editor(th, &name, "First name").Layout),
@@ -33,12 +33,12 @@ func addStudent(th *material.Theme, state *state.Handle) Screen {
 			}),
 		)
 		if close.Clicked() {
-			return mainMenu(th, state)
+			return mainMenu(th, state), d
 		}
 		if save.Clicked() {
 			state.AddStudent(name.Text(), surname.Text())
-			return mainMenu(th, state)
+			return mainMenu(th, state), d
 		}
-		return nil
+		return nil, d
 	}
 }

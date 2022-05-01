@@ -9,6 +9,7 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/unit"
 	"gioui.org/widget/material"
 )
 
@@ -33,7 +34,7 @@ type Handle struct {
 //   )
 //   // Handle button clicks and other events here.
 // }
-type Screen func(gtx layout.Context) Screen
+type Screen func(gtx layout.Context) (Screen, layout.Dimensions)
 
 // NewHandle initializes the UI handler.
 func NewHandle(state *state.Handle) (*Handle, error) {
@@ -60,22 +61,21 @@ func (h *Handle) HandleEvents() error {
 	for e := range h.window.Events() {
 		switch evt := e.(type) {
 		case system.FrameEvent:
-			h.displayWindow(evt)
+			gtx := layout.NewContext(&op.Ops{}, evt)
+			layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+				nextLayout, d := h.layout(gtx)
+				if nextLayout != nil {
+					h.layout = nextLayout
+				}
+				return d
+			})
+			if h.state.ShouldQuit() {
+				h.window.Perform(system.ActionClose)
+			}
+			evt.Frame(gtx.Ops)
 		case system.DestroyEvent:
 			return evt.Err
 		}
 	}
 	return nil
-}
-
-// displayWindow renders a page layout and handles application events.
-func (h *Handle) displayWindow(evt system.FrameEvent) {
-	gtx := layout.NewContext(&op.Ops{}, evt)
-	if nextLayout := h.layout(gtx); nextLayout != nil {
-		h.layout = nextLayout
-	}
-	if h.state.ShouldQuit() {
-		h.window.Perform(system.ActionClose)
-	}
-	evt.Frame(gtx.Ops)
 }

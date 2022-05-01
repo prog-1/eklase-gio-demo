@@ -13,8 +13,8 @@ import (
 func listStudents(th *material.Theme, vals *state.Handle) Screen {
 	var close widget.Clickable
 	list := widget.List{List: layout.List{Axis: layout.Vertical}}
-	return func(gtx layout.Context) Screen {
-		layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+	return func(gtx layout.Context) (Screen, layout.Dimensions) {
+		d := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 				return material.List(th, &list).Layout(gtx, vals.StudentCount(), func(gtx layout.Context, index int) layout.Dimensions {
 					student := vals.Student(index)
@@ -24,8 +24,8 @@ func listStudents(th *material.Theme, vals *state.Handle) Screen {
 			layout.Rigid(material.Button(th, &close, "Close").Layout),
 		)
 		if close.Clicked() {
-			return mainMenu(th, vals)
+			return mainMenu(th, vals), d
 		}
-		return nil
+		return nil, d
 	}
 }
