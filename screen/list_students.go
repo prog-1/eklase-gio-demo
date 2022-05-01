@@ -1,8 +1,9 @@
 package screen
 
 import (
-	"eklase/state"
+	"eklase/manager"
 	"fmt"
+	"log"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -13,7 +14,7 @@ import (
 )
 
 // listStudents defines a screen layout for listing existing students.
-func listStudents(th *material.Theme, vals *state.Handle) Screen {
+func listStudents(th *material.Theme, manager *manager.AppManager) Screen {
 	var close widget.Clickable
 	list := widget.List{List: layout.List{Axis: layout.Vertical}}
 
@@ -24,8 +25,15 @@ func listStudents(th *material.Theme, vals *state.Handle) Screen {
 	return func(gtx layout.Context) (Screen, layout.Dimensions) {
 		d := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-				return material.List(th, &list).Layout(gtx, vals.StudentCount(), func(gtx layout.Context, index int) layout.Dimensions {
-					student := vals.Student(index)
+				studentCnt, err := manager.StudentCount()
+				if err != nil {
+					log.Fatal(err)
+				}
+				return material.List(th, &list).Layout(gtx, studentCnt, func(gtx layout.Context, index int) layout.Dimensions {
+					student, err := manager.Student(index)
+					if err != nil {
+						log.Fatal(err)
+					}
 					rec := op.Record(gtx.Ops)
 					d := rowInset(material.Body1(th, fmt.Sprintf("%s %s", student.Surname, student.Name)).Layout)(gtx)
 					macro := rec.Stop()
@@ -41,7 +49,7 @@ func listStudents(th *material.Theme, vals *state.Handle) Screen {
 			layout.Rigid(rowInset(material.Button(th, &close, "Close").Layout)),
 		)
 		if close.Clicked() {
-			return mainMenu(th, vals), d
+			return mainMenu(th, manager), d
 		}
 		return nil, d
 	}

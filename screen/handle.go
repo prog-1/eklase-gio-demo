@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"eklase/state"
+	"eklase/manager"
 	"errors"
 
 	"gioui.org/app"
@@ -19,8 +19,6 @@ type Handle struct {
 	window *app.Window
 	// theme is a UI theme.
 	theme *material.Theme
-	// state is an application state.
-	state *state.Handle
 	// layout defines a screen layout to render.
 	layout Screen
 }
@@ -37,7 +35,7 @@ type Handle struct {
 type Screen func(gtx layout.Context) (Screen, layout.Dimensions)
 
 // NewHandle initializes the UI handler.
-func NewHandle(state *state.Handle) (*Handle, error) {
+func NewHandle(manager *manager.AppManager) (*Handle, error) {
 	th := material.NewTheme(gofont.Collection())
 	if th == nil {
 		return nil, errors.New("unexpected error while loading theme")
@@ -46,18 +44,14 @@ func NewHandle(state *state.Handle) (*Handle, error) {
 	h := Handle{
 		window: app.NewWindow(),
 		theme:  th,
-		state:  state,
 		// mainMenus is the default page.
-		layout: mainMenu(th, state),
+		layout: mainMenu(th, manager),
 	}
 	return &h, nil
 }
 
-// Close closes the UI dependencies.
-func (h *Handle) Close() error { return h.state.Close() }
-
 // HandleEvents handles application events.
-func (h *Handle) HandleEvents() error {
+func (h *Handle) HandleEvents(manager *manager.AppManager) error {
 	for e := range h.window.Events() {
 		switch evt := e.(type) {
 		case system.FrameEvent:
@@ -69,7 +63,7 @@ func (h *Handle) HandleEvents() error {
 				}
 				return d
 			})
-			if h.state.ShouldQuit() {
+			if manager.ShouldQuit() {
 				h.window.Perform(system.ActionClose)
 			}
 			evt.Frame(gtx.Ops)

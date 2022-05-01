@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
+	"eklase/manager"
 	"eklase/screen"
-	"eklase/state"
 
 	"gioui.org/app"
 
@@ -13,22 +13,22 @@ import (
 )
 
 func main() {
-	// Initialize the state.
-	state, err := state.New("school.db")
+	// Initialize the manager.
+	manager, err := manager.New("school.db")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer state.Close()
+	defer manager.Close()
 
 	// Create an application UI.
-	ui, err := screen.NewHandle(state)
+	ui, err := screen.NewHandle(manager)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Run the main event loop.
 	go func() {
-		if err := ui.HandleEvents(); err != nil {
+		if err := ui.HandleEvents(manager); err != nil {
 			log.Fatal(err)
 		}
 		// Gracefully exit the application at the end.
