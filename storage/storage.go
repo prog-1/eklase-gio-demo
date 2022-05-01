@@ -1,5 +1,5 @@
-// Package db is an interface for interacting with a database.
-package db
+// Package storage is an interface for interacting with a database.
+package storage
 
 import (
 	"fmt"
@@ -30,17 +30,14 @@ type StudentEntry struct {
 	Surname string `db:"surname"`
 }
 
-// Handle is a DB handler.
-//
-// Handle ensures that its fields are always consistent with the database state.
-type Handle struct {
-	db       *sqlx.DB
-	students []StudentEntry
+// Storage is an interface for interacting with persistent storage.
+type Storage struct {
+	db *sqlx.DB
 }
 
 // New initializes a new DB given its path, or opens an existing DB, and
 // initializes the handler. Returns an error if any of the steps fails.
-func New(path string) (*Handle, error) {
+func New(path string) (*Storage, error) {
 	// Open a DB by the path.
 	db, err := sqlx.Open("sqlite", path)
 	if err != nil {
@@ -55,29 +52,28 @@ func New(path string) (*Handle, error) {
 	if cnt, err := res.RowsAffected(); err != nil {
 		log.Printf("%d rows affected.", cnt)
 	}
-	h := Handle{db: db}
 
-	// Read rows from the `students` table and populate students field in the
-	// handler.
-	if err := h.db.Select(&h.students, selectStudentsStmt); err != nil {
-		return nil, fmt.Errorf("querying 'students' table failed. Query: %v\nError: %v", selectStudentsStmt, err)
-	}
-
-	return &h, nil
+	return &Storage{db: db}, nil
 }
 
 // Close closes the database after it is no longer required.
-func (h *Handle) Close() error {
+func (h *Storage) Close() error {
 	return h.db.Close()
 }
 
 // Students returns a slice of existing students.
-func (h Handle) Students() []StudentEntry {
-	return h.students
+func (h Storage) Students() ([]StudentEntry, error) {
+	var entries []StudentEntry
+	// Read rows from the `students` table and populate students field in the
+	// handler.
+	if err := h.db.Select(&entries, selectStudentsStmt); err != nil {
+		return nil, fmt.Errorf("querying 'students' table failed. Query: %v\nError: %v", selectStudentsStmt, err)
+	}
+	return entries, nil
 }
 
 // AddStudent appends a new student entry to the database.
-func (h *Handle) AddStudent(name, surname string) error {
+func (h *Storage) AddStudent(name, surname string) error {
 	// Attempt to add an entry to the database first.
 	// If it fails, the student field will not be modified.
 	res, err := h.db.Exec(insertStudentsStmt, name, surname)
@@ -87,8 +83,5 @@ func (h *Handle) AddStudent(name, surname string) error {
 	if cnt, err := res.RowsAffected(); err != nil {
 		log.Printf("%d rows affected.", cnt)
 	}
-
-	h.students = append(h.students, StudentEntry{name, surname})
-
 	return nil
 }
