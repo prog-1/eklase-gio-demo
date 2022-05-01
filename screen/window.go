@@ -48,7 +48,7 @@ func (w *Window) HandleEvents(state *state.State) error {
 		switch evt := e.(type) {
 		case system.FrameEvent:
 			gtx := layout.NewContext(&op.Ops{}, evt)
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				nextLayout, d := w.layout(gtx)
 				if nextLayout != nil {
 					w.layout = nextLayout
