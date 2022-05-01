@@ -15,13 +15,13 @@ func listStudents(th *material.Theme, vals *state.Handle) Screen {
 	list := widget.List{List: layout.List{Axis: layout.Vertical}}
 	return func(gtx layout.Context) (Screen, layout.Dimensions) {
 		d := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+			layout.Flexed(1, rowInset(func(gtx layout.Context) layout.Dimensions {
 				return material.List(th, &list).Layout(gtx, vals.StudentCount(), func(gtx layout.Context, index int) layout.Dimensions {
 					student := vals.Student(index)
 					return material.Body1(th, fmt.Sprintf("%s %s", student.Surname, student.Name)).Layout(gtx)
 				})
-			}),
-			layout.Rigid(material.Button(th, &close, "Close").Layout),
+			})),
+			layout.Rigid(rowInset(material.Button(th, &close, "Close").Layout)),
 		)
 		if close.Clicked() {
 			return mainMenu(th, vals), d

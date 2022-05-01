@@ -17,9 +17,9 @@ func mainMenu(th *material.Theme, state *state.Handle) Screen {
 	)
 	return func(gtx layout.Context) (Screen, layout.Dimensions) {
 		d := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-			layout.Rigid(material.Button(th, &add, "Add student").Layout),
-			layout.Rigid(material.Button(th, &list, "List students").Layout),
-			layout.Rigid(material.Button(th, &quit, "Quit").Layout),
+			layout.Rigid(rowInset(material.Button(th, &add, "Add student").Layout)),
+			layout.Rigid(rowInset(material.Button(th, &list, "List students").Layout)),
+			layout.Rigid(rowInset(material.Button(th, &quit, "Quit").Layout)),
 		)
 		if add.Clicked() {
 			return addStudent(th, state), d

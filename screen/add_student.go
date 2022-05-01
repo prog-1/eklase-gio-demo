@@ -17,20 +17,22 @@ func addStudent(th *material.Theme, state *state.Handle) Screen {
 		close widget.Clickable
 		save  widget.Clickable
 	)
+	editsRowLayout := func(gtx layout.Context) layout.Dimensions {
+		return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+			layout.Flexed(1, colInset(material.Editor(th, &name, "First name").Layout)),
+			layout.Flexed(1, colInset(material.Editor(th, &surname, "Last name").Layout)),
+		)
+	}
+	buttonsRowLayout := func(gtx layout.Context) layout.Dimensions {
+		return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+			layout.Flexed(1, colInset(material.Button(th, &close, "Close").Layout)),
+			layout.Flexed(1, colInset(material.Button(th, &save, "Save").Layout)),
+		)
+	}
 	return func(gtx layout.Context) (Screen, layout.Dimensions) {
 		d := layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Flexed(1, material.Editor(th, &name, "First name").Layout),
-					layout.Flexed(1, material.Editor(th, &surname, "Last name").Layout),
-				)
-			}),
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Flexed(1, material.Button(th, &close, "Close").Layout),
-					layout.Flexed(1, material.Button(th, &save, "Save").Layout),
-				)
-			}),
+			layout.Rigid(rowInset(editsRowLayout)),
+			layout.Rigid(rowInset(buttonsRowLayout)),
 		)
 		if close.Clicked() {
 			return mainMenu(th, state), d
