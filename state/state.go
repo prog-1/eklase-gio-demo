@@ -13,9 +13,7 @@ type State struct {
 }
 
 // New returns a new state handler. Returns an error if any of the steps fails.
-func New(s *storage.Storage) *State {
-	return &State{storage: s}
-}
+func New(s *storage.Storage) *State { return &State{storage: s} }
 
 // Students returns students stored in the database.
 func (h *State) Students() ([]storage.StudentEntry, error) {
@@ -28,11 +26,8 @@ func (v *State) AddStudent(name, surname string) error {
 }
 
 // Quit requests quitting the application.
-func (v *State) Quit() {
-	v.quit = true
-}
+func (v *State) Quit() { v.quit = true }
 
-// ShouldQuit returns whether quitting the application was requested.
-func (v *State) ShouldQuit() bool {
-	return v.quit
-}
+// ShouldQuit returns whether quitting the application was requested. The
+// method does not reset internal quit flag and keeps it set.
+func (v *State) ShouldQuit() bool { return v.quit }

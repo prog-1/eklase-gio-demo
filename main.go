@@ -34,7 +34,7 @@ func main() {
 }
 
 func mainLoop(w *app.Window) error {
-	storage := storage.Must(storage.New("school.db"))
+	storage := storage.MustOpen("school.db")
 	defer storage.Close()
 
 	appState := state.New(storage)

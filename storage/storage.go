@@ -2,7 +2,6 @@
 package storage
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -13,19 +12,19 @@ var (
 	// In the future can be expanded with creation of other tables.
 	createTableStmt = `
 CREATE TABLE IF NOT EXISTS students (
-	id	INTEGER,
-	name	TEXT,
-	surname	TEXT,
-	PRIMARY KEY(id AUTOINCREMENT)
+	id	    INTEGER PRIMARY KEY AUTOINCREMENT,
+	name	  TEXT,
+	surname	TEXT
 );`
 	// Statement for adding a new entry into `students` table.
 	insertStudentsStmt = `INSERT INTO students (name, surname) VALUES(?, ?)`
 	// Statement for getting all entries from `students` table.
-	selectStudentsStmt = `SELECT name, surname FROM students`
+	selectStudentsStmt = `SELECT * FROM students`
 )
 
 // StudentEntry represents a row for a single student in the DB.
 type StudentEntry struct {
+	ID      int64
 	Name    string `db:"name"`
 	Surname string `db:"surname"`
 }
@@ -35,28 +34,23 @@ type Storage struct {
 	db *sqlx.DB
 }
 
-// New initializes a new DB given its path, or opens an existing DB, and
+// Open initializes a new DB given its path, or opens an existing DB, and
 // initializes the handler. Returns an error if any of the steps fails.
-func New(path string) (*Storage, error) {
+func Open(path string) (s *Storage, err error) {
+	var db *sqlx.DB
 	// Open a DB by the path.
-	db, err := sqlx.Open("sqlite", path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open SQLite DB: %v", db)
+	if db, err = sqlx.Open("sqlite", path); err != nil {
+		return nil, err
 	}
-
 	// Create new tables. Note that the tables may exist already.
-	res, err := db.Exec(createTableStmt)
-	if err != nil {
-		return nil, fmt.Errorf("table creation failed. Query: %v\nError: %v", createTableStmt, err)
+	if _, err = db.Exec(createTableStmt); err != nil {
+		return nil, err
 	}
-	if cnt, err := res.RowsAffected(); err != nil {
-		log.Printf("%d rows affected.", cnt)
-	}
-
 	return &Storage{db: db}, nil
 }
 
-func Must(s *Storage, err error) *Storage {
+func MustOpen(path string) *Storage {
+	s, err := Open(path)
 	if err != nil {
 		log.Fatalf("unable to create storage: %v", err)
 	}
@@ -64,31 +58,18 @@ func Must(s *Storage, err error) *Storage {
 }
 
 // Close closes the database after it is no longer required.
-func (s *Storage) Close() error {
-	return s.db.Close()
-}
+func (s *Storage) Close() error { return s.db.Close() }
 
 // Students returns a slice of existing students.
-func (s Storage) Students() ([]StudentEntry, error) {
-	var entries []StudentEntry
-	// Read rows from the `students` table and populate students field in the
-	// handler.
-	if err := s.db.Select(&entries, selectStudentsStmt); err != nil {
-		return nil, fmt.Errorf("querying 'students' table failed. Query: %v\nError: %v", selectStudentsStmt, err)
-	}
-	return entries, nil
+func (s Storage) Students() (entries []StudentEntry, err error) {
+	err = s.db.Select(&entries, selectStudentsStmt)
+	return entries, err
 }
 
 // AddStudent appends a new student entry to the database.
 func (s *Storage) AddStudent(name, surname string) error {
 	// Attempt to add an entry to the database first.
 	// If it fails, the student field will not be modified.
-	res, err := s.db.Exec(insertStudentsStmt, name, surname)
-	if err != nil {
-		return fmt.Errorf("table creation failed. Query: %v\nError: %v", createTableStmt, err)
-	}
-	if cnt, err := res.RowsAffected(); err != nil {
-		log.Printf("%d rows affected.", cnt)
-	}
-	return nil
+	_, err := s.db.Exec(insertStudentsStmt, name, surname)
+	return err
 }
