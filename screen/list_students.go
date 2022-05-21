@@ -2,9 +2,10 @@ package screen
 
 import (
 	"eklase/state"
-	"fmt"
 	"image"
+	"image/color"
 	"log"
+	"strconv"
 
 	"gioui.org/layout"
 	"gioui.org/op/clip"
@@ -30,22 +31,45 @@ func ListStudent(th *material.Theme, state *state.State) Screen {
 		return nil
 	}
 
+	layoutCell := func(gtx layout.Context, bg color.NRGBA, text string) layout.Dimensions {
+		return layout.Stack{}.Layout(gtx,
+			layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+				max := image.Pt(gtx.Constraints.Max.X, gtx.Constraints.Min.Y)
+				paint.FillShape(gtx.Ops, bg, clip.Rect{Max: max}.Op())
+				return layout.Dimensions{Size: gtx.Constraints.Min}
+			}),
+			layout.Stacked(rowInset(material.Body1(th, text).Layout)),
+		)
+	}
+	layoutRow := func(gtx layout.Context, bg color.NRGBA, id, last, first string) layout.Dimensions {
+		return layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+			layout.Flexed(2, func(gtx layout.Context) layout.Dimensions {
+				return layoutCell(gtx, bg, id)
+			}),
+			layout.Flexed(5, func(gtx layout.Context) layout.Dimensions {
+				return layoutCell(gtx, bg, last)
+			}),
+			layout.Flexed(5, func(gtx layout.Context) layout.Dimensions {
+				return layoutCell(gtx, bg, first)
+			}),
+		)
+	}
 	studentsLayout := func(gtx layout.Context) layout.Dimensions {
-		return material.List(th, &list).Layout(gtx, len(students), func(gtx layout.Context, index int) layout.Dimensions {
-			student := students[index]
-			return layout.Stack{}.Layout(gtx,
-				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-					color := lightContrast
+		return layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+				return layoutRow(gtx, th.Bg, "ID", "Last Name", "First Name")
+			}),
+			layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
+				return material.List(th, &list).Layout(gtx, len(students), func(gtx layout.Context, index int) layout.Dimensions {
+					student := students[index]
+					bg := lightContrast
 					if index%2 == 0 {
-						color = darkContrast
+						bg = darkContrast
 					}
-					max := image.Pt(gtx.Constraints.Max.X, gtx.Constraints.Min.Y)
-					paint.FillShape(gtx.Ops, color, clip.Rect{Max: max}.Op())
-					return layout.Dimensions{Size: gtx.Constraints.Min}
-				}),
-				layout.Stacked(rowInset(material.Body1(th, fmt.Sprintf("%s %s", student.Surname, student.Name)).Layout)),
-			)
-		})
+					return layoutRow(gtx, bg, strconv.FormatInt(student.ID, 10), student.Surname, student.Name)
+				})
+			}),
+		)
 	}
 
 	return func(gtx layout.Context) (Screen, layout.Dimensions) {
