@@ -45,12 +45,13 @@ func mainLoop(w *app.Window) error {
 	th := material.NewTheme(gofont.Collection())
 	currentLayout := screen.MainMenu(th, appState)
 
+	var ops op.Ops
 	for {
 		select {
 		case e := <-w.Events():
 			switch e := e.(type) {
 			case system.FrameEvent:
-				gtx := layout.NewContext(&op.Ops{}, e)
+				gtx := layout.NewContext(&ops, e)
 				layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					nextLayout, d := currentLayout(gtx)
 					if nextLayout != nil {
