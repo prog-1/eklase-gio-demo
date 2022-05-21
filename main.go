@@ -52,13 +52,7 @@ func mainLoop(w *app.Window) error {
 			switch e := e.(type) {
 			case system.FrameEvent:
 				gtx := layout.NewContext(&ops, e)
-				layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-					nextLayout, d := currentLayout(gtx)
-					if nextLayout != nil {
-						currentLayout = nextLayout
-					}
-					return d
-				})
+				currentLayout = layoutScreen(gtx, currentLayout)
 				if appState.ShouldQuit() {
 					w.Perform(system.ActionClose)
 				}
@@ -68,4 +62,14 @@ func mainLoop(w *app.Window) error {
 			}
 		}
 	}
+}
+
+func layoutScreen(gtx layout.Context, s screen.Screen) (next screen.Screen) {
+	layout.UniformInset(unit.Dp(5)).Layout(gtx, func(gtx layout.Context) (d layout.Dimensions) {
+		if next, d = s(gtx); next == nil {
+			next = s
+		}
+		return d
+	})
+	return next
 }
