@@ -34,10 +34,13 @@ func main() {
 }
 
 func mainLoop(w *app.Window) error {
-	storage := storage.MustOpen("school.db")
-	defer storage.Close()
+	stor, err := storage.Open("school.db")
+	if err != nil {
+		return err
+	}
+	defer stor.Close()
 
-	appState := state.New(storage)
+	appState := state.New(stor)
 
 	th := material.NewTheme(gofont.Collection())
 	currentLayout := screen.MainMenu(th, appState)

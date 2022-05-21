@@ -2,8 +2,6 @@
 package storage
 
 import (
-	"log"
-
 	"github.com/jmoiron/sqlx"
 )
 
@@ -47,14 +45,6 @@ func Open(path string) (s *Storage, err error) {
 		return nil, err
 	}
 	return &Storage{db: db}, nil
-}
-
-func MustOpen(path string) *Storage {
-	s, err := Open(path)
-	if err != nil {
-		log.Fatalf("unable to create storage: %v", err)
-	}
-	return s
 }
 
 // Close closes the database after it is no longer required.
